@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	llm "github.com/nyxoy77/B2C_YouTube_Doctor/llmcall"
 	"github.com/nyxoy77/B2C_YouTube_Doctor/models"
 )
 
@@ -42,8 +43,16 @@ func GetVideos(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"titles": titles,
+
+	finalResponse, err := llm.AnalyzeVideoTitles(titles)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error in llm call": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"response": finalResponse,
 	})
 }
 
