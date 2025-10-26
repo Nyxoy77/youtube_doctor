@@ -1,4 +1,4 @@
-package routes
+package utils
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-func getNewYtService() *youtube.Service {
+func GetNewYtService() *youtube.Service {
 	ctx := context.Background()
 
 	b, err := os.ReadFile("client_secret.json")
@@ -41,10 +41,8 @@ func getNewYtService() *youtube.Service {
 		return nil
 	}
 
-
 	client := config.Client(ctx, tok)
 
-	// Create YouTube service
 	service, err := youtube.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		log.Printf("Error creating YouTube service: %v", err)
