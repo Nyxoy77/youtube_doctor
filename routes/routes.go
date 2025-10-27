@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nyxoy77/B2C_YouTube_Doctor/constant"
 	"github.com/nyxoy77/B2C_YouTube_Doctor/models"
 	"github.com/nyxoy77/B2C_YouTube_Doctor/service"
+	"github.com/nyxoy77/B2C_YouTube_Doctor/utils"
 )
 
 type Handler struct {
@@ -21,27 +23,19 @@ func (h *Handler) GetVideos(c *gin.Context) {
 	var reqBody models.GetVideoRequest
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		log.Printf("error occurred parsing request body: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
+		utils.WriteError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if reqBody.ChannelName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Missing channel name",
-		})
+		utils.WriteError(c, http.StatusBadRequest, constant.MissingChannelError)
 		return
 	}
 
 	finalResponse, err := h.service.TriggerService(c.Request.Context(), reqBody.ChannelName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error from service": err,
-		})
+		utils.WriteError(c, http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(200, gin.H{
-		"response": finalResponse,
-	})
+	utils.WriteSuccess(c, http.StatusOK, finalResponse)
 }

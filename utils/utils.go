@@ -3,14 +3,40 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
+	"google.golang.org/genai"
 )
+
+func WriteError(c *gin.Context, status int, message any) {
+	c.JSON(status, gin.H{
+		"error": message,
+	})
+}
+
+func WriteSuccess(c *gin.Context, status int, message any) {
+	c.JSON(status, gin.H{
+		"response": message,
+	})
+}
+
+func InitialIzeGeminiClient(ctx context.Context) (*genai.Client, error) {
+	config := &genai.ClientConfig{
+		APIKey: os.Getenv("API_KEY"),
+	}
+	client, err := genai.NewClient(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("error setting up the client %w", err)
+	}
+	return client, nil
+}
 
 func GetNewYtService() *youtube.Service {
 	ctx := context.Background()
