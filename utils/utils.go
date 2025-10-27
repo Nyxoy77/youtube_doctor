@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -76,4 +77,14 @@ func GetNewYtService() *youtube.Service {
 	}
 
 	return service
+}
+
+func GlobalLoggerInstance() *logrus.Logger {
+	logger := &logrus.Logger{
+		Out: os.Stderr,
+		Formatter: &logrus.TextFormatter{
+			FullTimestamp: true,
+		},
+	}
+	return logger
 }

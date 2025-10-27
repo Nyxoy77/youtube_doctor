@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nyxoy77/B2C_YouTube_Doctor/constant"
 	"github.com/nyxoy77/B2C_YouTube_Doctor/models"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/api/youtube/v3"
 	"google.golang.org/genai"
 )
@@ -19,20 +21,21 @@ type DoctorClientInterface interface {
 type DoctorClient struct {
 	ytService   *youtube.Service
 	genAiClient *genai.Client
+	logger      *logrus.Logger
 }
 
-func NewDoctorClient(ytService *youtube.Service, genAiClient *genai.Client) DoctorClientInterface {
+func NewDoctorClient(ytService *youtube.Service, genAiClient *genai.Client, logger *logrus.Logger) DoctorClientInterface {
 	return &DoctorClient{
 		ytService:   ytService,
 		genAiClient: genAiClient,
+		logger:      logger,
 	}
 }
 
 func (c *DoctorClient) FetchTitles(ctx context.Context, channelName string) ([]string, error) {
-
 	searchCall := c.ytService.Search.List([]string{"id"}).
 		Context(ctx).
-		Type("channel").
+		Type(constant.Channel).
 		Q(channelName).
 		MaxResults(1)
 
@@ -50,7 +53,7 @@ func (c *DoctorClient) FetchTitles(ctx context.Context, channelName string) ([]s
 	searchCall = c.ytService.Search.List([]string{"id", "snippet"}).ChannelId(channelID).MaxResults(5)
 
 	searchResponse, err = searchCall.Do()
-	fmt.Println(err)
+
 	if err != nil {
 		return nil, fmt.Errorf("error occurred in the YouTube search call: %w", err)
 	}
@@ -65,24 +68,9 @@ func (c *DoctorClient) FetchTitles(ctx context.Context, channelName string) ([]s
 
 func (c *DoctorClient) LlmCall(ctx context.Context, titles []string) (*models.Response, error) {
 
-	prompt := `Analyze these YouTube video titles and provide improvements. 
-    Return the response in this exact JSON format for each title:
-    {
-        "llmResponse": [
-            {
-                "prevTitle": "original title",
-                "newTitle": "improved title",
-                "reason": "explanation for the improvement"
-            }
-        ]
-    }
-    
-    Only return valid JSON, no additional text.
-    Here are the titles to analyze:%s`
+	finalPrompt := fmt.Sprintf(constant.Prompt, strings.Join(titles, "\n"))
 
-	finalPrompt := fmt.Sprintf(prompt, strings.Join(titles, "\n"))
-
-	response, err := c.genAiClient.Models.GenerateContent(ctx, "gemini-2.5-flash", genai.Text(finalPrompt), nil)
+	response, err := c.genAiClient.Models.GenerateContent(ctx, constant.Gemini_Flash, genai.Text(finalPrompt), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error from llm call: %w", err)
 	}

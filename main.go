@@ -14,7 +14,7 @@ import (
 
 func main() {
 	router := gin.Default()
-
+	logger := utils.GlobalLoggerInstance()
 	ctx := context.Background()
 	err := godotenv.Load()
 
@@ -29,8 +29,8 @@ func main() {
 		fmt.Println("error initlaizing the geminiClient", err)
 		return
 	}
-	client := client.NewDoctorClient(ytService, genAiClient)
-	svc := service.NewDoctorService(client)
+	client := client.NewDoctorClient(ytService, genAiClient, logger)
+	svc := service.NewDoctorService(client, logger)
 
 	handler := routes.NewHandler(svc)
 	router.POST("/getVideo", handler.GetVideos)
