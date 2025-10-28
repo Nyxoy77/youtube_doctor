@@ -13,19 +13,19 @@ type DoctorServiceInterface interface {
 	TriggerService(ctx context.Context, channelName string) (*models.Response, error)
 }
 
-type DoctorService struct {
+type doctorService struct {
 	doctorClient client.DoctorClientInterface
 	logger       *logrus.Logger
 }
 
 func NewDoctorService(doctorClient client.DoctorClientInterface, logger *logrus.Logger) DoctorServiceInterface {
-	return &DoctorService{
+	return &doctorService{
 		doctorClient: doctorClient,
 		logger:       logger,
 	}
 }
 
-func (s *DoctorService) TriggerService(ctx context.Context, channelName string) (*models.Response, error) {
+func (s *doctorService) TriggerService(ctx context.Context, channelName string) (*models.Response, error) {
 	fetchTitles, err := s.doctorClient.FetchTitles(ctx, channelName)
 	if err != nil {
 		return nil, err

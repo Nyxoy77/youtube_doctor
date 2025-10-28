@@ -11,15 +11,15 @@ import (
 	"github.com/nyxoy77/B2C_YouTube_Doctor/utils"
 )
 
-type Handler struct {
+type handler struct {
 	service service.DoctorServiceInterface
 }
 
-func NewHandler(s service.DoctorServiceInterface) *Handler {
-	return &Handler{service: s}
+func NewHandler(s service.DoctorServiceInterface) *handler {
+	return &handler{service: s}
 }
 
-func (h *Handler) GetVideos(c *gin.Context) {
+func (h *handler) GetVideos(c *gin.Context) {
 	var reqBody models.GetVideoRequest
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		log.Printf("error occurred parsing request body: %v", err)
